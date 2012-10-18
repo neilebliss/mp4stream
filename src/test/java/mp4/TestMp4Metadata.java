@@ -88,7 +88,7 @@ public final class TestMp4Metadata extends TestCase
 		offset = mp4meta.findOffset(20f);
 		mp4meta.adjustMoov(20f);
 		assertTrue("expected valid Moov, didn't get one", mp4meta.mp4.moov != null);
-		assertTrue("bad duration.  expected 70440, got " + mp4meta.mp4.moov.mvhd.duration, mp4meta.mp4.moov	.mvhd.duration == 70440);
+		assertTrue("bad duration.  expected 70440, got " + mp4meta.mp4.moov.mvhd.duration, mp4meta.mp4.moov.mvhd.duration == 70440);
 
 		mp4meta = new Mp4Metadata(new File(TEST_FILE_LOCATION));
 		offset = mp4meta.findOffset(30f);
@@ -135,11 +135,6 @@ public final class TestMp4Metadata extends TestCase
 	}
 
 
-	private void debugPrint(String debugString)
-	{
-		//System.out.println(debugString);
-	}
-
 	private int getBoxPosition(String fileName, int[] box)
 	{
 		File file = new File(fileName);
@@ -152,8 +147,6 @@ public final class TestMp4Metadata extends TestCase
 		{
 			InputStream is = new FileInputStream(file);
 			long length = file.length();
-			debugPrint("File length is: " + length);
-
 
 			int i;
 			int ch[] = new int[4];
@@ -166,19 +159,18 @@ public final class TestMp4Metadata extends TestCase
 
 			mdat_found = false;
 			filepos = 0;
-			while (mdat_found == false)
+			while (!mdat_found)
 			{
 				// check if this is an mdat
 				if (ch[0] == box[0] && ch[1] == box[1] && ch[2] == box[2] && ch[3] == box[3])
 				{
 					mdat_found = true;
-					debugPrint("found mdat at "+filepos);
 				}
 				else
 				{
 					for (i = 1; i < 4; i++)
 					{
-						ch[i-1] = ch[i];
+						ch[i - 1] = ch[i];
 					}
 					ch[3] = is.read();
 					filepos++;
@@ -189,13 +181,13 @@ public final class TestMp4Metadata extends TestCase
 			filepos -= 4;
 
 		}
-		catch(FileNotFoundException e)
+		catch (FileNotFoundException e)
 		{
-			debugPrint("File " + file.getAbsolutePath() + " could not be found on filesystem");
+			e.printStackTrace();
 		}
-		catch(IOException ioe)
+		catch (IOException ioe)
 		{
-			debugPrint("Exception while reading the file" + ioe);
+			ioe.printStackTrace();
 		}
 
 		return filepos;
@@ -215,47 +207,32 @@ public final class TestMp4Metadata extends TestCase
 		int removed_entries;
 		int startentry;
 		int this_entries;
-		int i,j;
+		int i, j;
 
 		theStss.createEntries(numentries);
-
-		for (i = 0; i < theStss.entries.length; i++)
-		{
-			debugPrint("Original Stss entry "+i+" : "+theStss.entries[i]);
-		}
-
 
 		Stss testStss;
 
 		try
 		{
-			for (j = 1; j < (numentries*entries_per_sync); j++)
+			for (j = 1; j < (numentries * entries_per_sync); j++)
 			{
 				testStss = (Stss) theStss.clone();
 
 				// adjust the Stss atom
 				testStss.adjust(j);
 
-				removed_entries = (j - ((j - 1)%entries_per_sync)) / entries_per_sync;
-
-				debugPrint("Stss start at: "+j);
-				debugPrint("Removed entries: "+removed_entries);
+				removed_entries = (j - ((j - 1) % entries_per_sync)) / entries_per_sync;
 
 				this_entries = numentries - 1 - removed_entries;
-
-				debugPrint("Stss Entries: "+testStss.entries.length);
-
-				assertTrue("Stss: After adjust of "+j+" there should be "+this_entries+" entries, found "+testStss.entries.length,
+				assertTrue("Stss: After adjust of " + j + " there should be " + this_entries + " entries, found " + testStss.entries.length,
 					   this_entries == testStss.entries.length);
 
 				if (testStss.entries.length > 0)
 				{
-					startentry = entries_per_sync - ((j - 1)%entries_per_sync);
+					startentry = entries_per_sync - ((j - 1) % entries_per_sync);
 
-					debugPrint("First Stss: "+startentry+" "+testStss.entries[0]);
-
-
-					assertTrue("Stss: first entry should be "+startentry+", found "+testStss.entries[0],
+					assertTrue("Stss: first entry should be " + startentry + ", found " + testStss.entries[0],
 						   startentry == testStss.entries[0]);
 				}
 
@@ -276,7 +253,7 @@ public final class TestMp4Metadata extends TestCase
 
 		Stts theStts = new Stts();
 		int numentries = 100;
-		int i,j;
+		int i, j;
 		int current_time;
 		int current_entry;
 		int this_sample_count;
@@ -292,10 +269,10 @@ public final class TestMp4Metadata extends TestCase
 		for (i = 0; i < numentries; i++)
 		{
 			// the number of samples with the same sampleDelta
-			theStts.sampleCounts[i] = (i+1);
+			theStts.sampleCounts[i] = (i + 1);
 
 			// set the sampleDelta of each sample in this group
-			theStts.sampleDeltas[i] = (i+1)*2;
+			theStts.sampleDeltas[i] = (i + 1) * 2;
 
 			theStts.startTimes[i] = current_time;
 
@@ -307,13 +284,6 @@ public final class TestMp4Metadata extends TestCase
 			theStts.endTimes[i] = current_time;
 		}
 
-		for (i = 0; i < 10; i++)
-		{
-			debugPrint(theStts.sampleCounts[i]+" "+theStts.sampleDeltas[i]+" "+
-					   theStts.startTimes[i]+" "+theStts.endTimes[i]);
-		}
-
-
 		Stts testStts;
 		try
 		{
@@ -324,12 +294,10 @@ public final class TestMp4Metadata extends TestCase
 				testStts.adjust((long) j);
 
 				// should we increment current sample?
-				debugPrint(j+" "+theStts.endTimes[current_entry]);
 				if (j >= theStts.endTimes[current_entry])
 				{
 					// this test time is later than the end time of the current entry
 					// step to the next one
-					debugPrint(j+" is greater than ("+current_entry+") "+theStts.endTimes[current_entry]);
 					current_entry++;
 				}
 
@@ -342,34 +310,20 @@ public final class TestMp4Metadata extends TestCase
 
 				curr_samples_in_group = theStts.sampleCounts[current_entry] - num_skipped_samples;
 
-				debugPrint("num skipped samples: "+num_skipped_samples);
-				debugPrint("curr samples: "+curr_samples_in_group);
-
-				debugPrint("Stts test time "+j+" time delta "+time_delta);
-				i = 0;
-				{
-					debugPrint(testStts.sampleCounts[i]+" "+testStts.sampleDeltas[i]+" "+
-							   testStts.startTimes[i]+" "+testStts.endTimes[i]);
-				}
-
-				debugPrint("Current entry: "+current_entry+" : "+testStts.sampleCounts[0]);
-
 				// what should happen if the end time of one entry matches the start time of the next?
 
 				// current number of samples should match
-				assertTrue("Stts: samples in adjusted Stts should be "+curr_samples_in_group+", found "+testStts.sampleCounts[0],
+				assertTrue("Stts: samples in adjusted Stts should be " + curr_samples_in_group + ", found " + testStts.sampleCounts[0],
 					   curr_samples_in_group == testStts.sampleCounts[0]);
 
 				// current sampleDelta should match
-				assertTrue("Stts: sample delta should be "+theStts.sampleDeltas[current_entry]+", found "+testStts.sampleDeltas[0],
+				assertTrue("Stts: sample delta should be " + theStts.sampleDeltas[current_entry] + ", found " + testStts.sampleDeltas[0],
 					   theStts.sampleDeltas[current_entry] == testStts.sampleDeltas[0]);
-
-				testStts = null;
 
 			}
 
 		}
-		catch(CloneNotSupportedException ex)
+		catch (CloneNotSupportedException ex)
 		{
 		}
 
@@ -387,7 +341,7 @@ public final class TestMp4Metadata extends TestCase
 		// if sample_size = 0, then each entry has a different size
 
 		// create a test Stsz object
-		int i,j;
+		int i, j;
 		int numentries;
 		int shortened_entries;
 		Stz2 theStsz = new Stz2();
@@ -419,7 +373,7 @@ public final class TestMp4Metadata extends TestCase
 
 				shortened_entries = numentries - j;
 
-				assertTrue("Should be "+shortened_entries+" entries, there were "+testStsz.entryCount,
+				assertTrue("Should be " + shortened_entries + " entries, there were " + testStsz.entryCount,
 					   shortened_entries == testStsz.entryCount);
 
 
@@ -457,7 +411,7 @@ public final class TestMp4Metadata extends TestCase
 				new File("./stz2.out").delete();
 			}
 		}
-		catch(CloneNotSupportedException ex)
+		catch (CloneNotSupportedException ex)
 		{
 		}
 		// should also test 64 bit version of this box
@@ -493,7 +447,7 @@ public final class TestMp4Metadata extends TestCase
 
 				shortened_entries = numentries - j;
 
-				assertTrue("Should be "+shortened_entries+" entries, there were "+testStsz.entryCount,
+				assertTrue("Should be " + shortened_entries + " entries, there were " + testStsz.entryCount,
 					   shortened_entries == testStsz.entryCount);
 
 
@@ -505,7 +459,7 @@ public final class TestMp4Metadata extends TestCase
 
 			}
 		}
-		catch(CloneNotSupportedException ex)
+		catch (CloneNotSupportedException ex)
 		{
 		}
 	}
@@ -595,8 +549,6 @@ public final class TestMp4Metadata extends TestCase
 		for (i = 0; i < theStsc.entryCount; i++)
 		{
 			theStscEntry = theStsc.entries[i];
-			debugPrint(i+": "+theStscEntry.chunkGroupId+" "+theStscEntry.firstChunk+" "+theStscEntry.firstSampleId+" "
-					   +theStscEntry.samplesPerChunk+" "+theStscEntry.sampleDescriptionIndex+" "+theStscEntry.chunks);
 		}
 
 		// now try adjusting this stsc
@@ -606,8 +558,6 @@ public final class TestMp4Metadata extends TestCase
 		{
 			try
 			{
-				debugPrint("testStartSample: "+testStartSample);
-				//theStsc.adjust(testStartSample);
 				testStsc = (Stsc) theStsc.clone();
 				testStsc.adjust(testStartSample);
 
@@ -616,8 +566,6 @@ public final class TestMp4Metadata extends TestCase
 				for (i = 0; i < testStsc.entryCount; i++)
 				{
 					theStscEntry = testStsc.entries[i];
-					debugPrint(i+": "+theStscEntry.chunkGroupId+" "+theStscEntry.firstChunk+" "+theStscEntry.firstSampleId+" "
-							   +theStscEntry.samplesPerChunk+" "+theStscEntry.sampleDescriptionIndex+" "+theStscEntry.chunks);
 				}
 
 
@@ -632,15 +580,10 @@ public final class TestMp4Metadata extends TestCase
 
 				// how many runs of chunks are fully skipped?
 				skipped_runs = ((testStartSample - 1) - skipped_remainder) / (chunksInRun * samplesInThisChunk);
-				debugPrint("Skipped chunk remainder: "+skipped_remainder);
-				debugPrint("Skipped runs: "+skipped_runs);
 
 				// now determine how many full chunks to skip from the remaining samples
 				skipped_chunk_remainder = skipped_remainder % samplesInThisChunk;
 				skipped_chunks = (skipped_remainder - skipped_chunk_remainder) / samplesInThisChunk;
-
-				debugPrint("skipped chunks: "+skipped_chunks);
-				debugPrint("skipped chunk remainder: "+skipped_chunk_remainder);
 
 				currentRun = 0;
 				if (skipped_chunk_remainder > 0 || skipped_chunks > 0)
@@ -649,10 +592,7 @@ public final class TestMp4Metadata extends TestCase
 					testSamplesPerChunk = samplesInThisChunk - skipped_chunk_remainder;
 
 					// get samples per chunk in the first run of chunks
-					debugPrint("samples per chunk should be "+testSamplesPerChunk);
-					debugPrint("samples per chunk in first run is: "+testStsc.entries[currentRun].samplesPerChunk);
-
-					assertTrue("SamplesPerChunk in run "+currentRun+" should be "+testSamplesPerChunk+", found "+testStsc.entries[currentRun].samplesPerChunk,
+					assertTrue("SamplesPerChunk in run " + currentRun + " should be " + testSamplesPerChunk + ", found " + testStsc.entries[currentRun].samplesPerChunk,
 						   testSamplesPerChunk == testStsc.entries[currentRun].samplesPerChunk);
 
 					currentRun++;
@@ -667,23 +607,18 @@ public final class TestMp4Metadata extends TestCase
 					{
 						chunksInNextRun = chunksInRun;
 					}
-
-					debugPrint("next chunk should have "+chunksInNextRun+" chunks.");
-					debugPrint("chunks in the run: "+testStsc.entries[currentRun].chunks);
-
-					assertTrue("Chunks in run "+currentRun+" should be "+chunksInNextRun+", found "+testStsc.entries[currentRun].chunks,
+					assertTrue("Chunks in run " + currentRun + " should be " + chunksInNextRun + ", found " + testStsc.entries[currentRun].chunks,
 						   chunksInNextRun == testStsc.entries[currentRun].chunks);
 
 					currentRun++;
 				}
 
 			}
-			catch(CloneNotSupportedException ex)
+			catch (CloneNotSupportedException ex)
 			{
 			}
 		}
 	}
-
 
 
 	public void testStco()
@@ -708,7 +643,7 @@ public final class TestMp4Metadata extends TestCase
 		theStco.lastSampleIds = new int[test_stco_entries];
 		theStco.alignedOffsetsLists = new long[test_stco_entries][];
 
-		int i,j,thisSampleId,k;
+		int i, j, thisSampleId, k;
 		double droppedSamples;
 		int curr_offset = 1000; // this is the test file offset
 		int samples_per_chunk = 10; // sample value for samples in each chunk
@@ -751,7 +686,7 @@ public final class TestMp4Metadata extends TestCase
 		Sample theStartSample = new Sample();
 		int curr_entry = 0;
 		int curr_entry_sample = 0;
-		for (i = 0; i < total_samples-1; i++)
+		for (i = 0; i < total_samples - 1; i++)
 		{
 			theStartSample.sampleId = i;
 			theStartSample.offset = theStco.alignedOffsetsLists[curr_entry][curr_entry_sample];
@@ -774,7 +709,6 @@ public final class TestMp4Metadata extends TestCase
 				k = 0;
 				while (theStco.offsets[k] < theStartSample.offset && k < (test_stco_entries - 1))
 				{
-					debugPrint("current offset: "+k+" "+theStco.offsets[k]);
 					k++;
 				}
 				remainder = theStartSample.offset - theStco.offsets[k];
@@ -783,9 +717,9 @@ public final class TestMp4Metadata extends TestCase
 					k--;
 					remainder += entrysize;
 				}
-				assertTrue("Size of first stco entry does not match", testStco.sizes[0] == (entrysize - remainder) );
+				assertTrue("Size of first stco entry does not match", testStco.sizes[0] == (entrysize - remainder));
 			}
-			catch(CloneNotSupportedException ex)
+			catch (CloneNotSupportedException ex)
 			{
 			}
 
@@ -814,7 +748,7 @@ public final class TestMp4Metadata extends TestCase
 		theStco.lastSampleIds = new int[test_stco_entries];
 		theStco.alignedOffsetsLists = new long[test_stco_entries][];
 
-		int i,j,thisSampleId,k;
+		int i, j, thisSampleId, k;
 		double droppedSamples;
 		int curr_offset = 1000; // this is the test file offset
 		int samples_per_chunk = 10; // sample value for samples in each chunk
@@ -856,11 +790,6 @@ public final class TestMp4Metadata extends TestCase
 		}
 		total_samples = curr_sample;
 
-		for (i = 0; i < 10; i++)
-		{
-			debugPrint("Entry "+i+": "+theStco.offsets[i]);
-		}
-
 		//theStco.entryCount = theStco.entries.length;
 
 		//StcoEntry thisStcoEntry;
@@ -869,20 +798,14 @@ public final class TestMp4Metadata extends TestCase
 		// choose different offsets to test
 
 		//thisStcoEntry = theStco.entries[curr_entry];
-		for (i = 0; i < total_samples-1; i++)
+		for (i = 0; i < total_samples - 1; i++)
 		{
-			debugPrint("sampleId: "+i);
-			debugPrint("entry: "+curr_entry);
-
 			// set the sample id
 			theStartSample.sampleId = i;
 
-			debugPrint("curr sample in entry: "+curr_entry_sample);
 			theStartSample.offset = theStco.alignedOffsetsLists[curr_entry][curr_entry_sample];
-			debugPrint("offset: "+theStartSample.offset);
 
 			curr_entry_sample++;
-			debugPrint("Sample "+i+": offset "+theStartSample.offset);
 
 			// step to the next entry if needed
 			if (theStco.lastSampleIds[curr_entry] <= i)
@@ -903,11 +826,6 @@ public final class TestMp4Metadata extends TestCase
 				// adjust the stco using the current start sample
 				testStco.adjust(offset, (int) theStartSample.sampleId, theStartSample.offset);
 
-				// the current start time should be:
-				//  offset of the start sample used
-				debugPrint("Start offset of this entry: "+testStco.offsets[0]);
-				debugPrint("offset of the start sample: "+theStartSample.offset);
-
 				// assert that the starting offset of the first entry in the new stco
 				// must equal the start sample's offset plus the offset passed to the adjust parameter
 				assertTrue("Start offsets do not match.  Expected: " + theStartSample.offset + ", actual: " + (testStco.offsets[0] + offset), theStartSample.offset == (testStco.offsets[0] + offset));
@@ -916,7 +834,6 @@ public final class TestMp4Metadata extends TestCase
 				k = 0;
 				while (theStco.offsets[k] < theStartSample.offset && k < (test_stco_entries - 1))
 				{
-					debugPrint("current offset: "+k+" "+theStco.offsets[k]);
 					k++;
 				}
 
@@ -928,17 +845,12 @@ public final class TestMp4Metadata extends TestCase
 					remainder += entrysize;
 				}
 
-				debugPrint("LAST OFFSET: "+k+" "+theStco.offsets[k]);
-				debugPrint("remainder: "+remainder);
-
-				debugPrint("size: "+testStco.sizes[0]);
-
 				// assert that the size of the first entry should equal the entry size
 				// minus the remainder after full chunks are removed
-				assertTrue("Size of first stco entry does not match", testStco.sizes[0] == (entrysize - remainder) );
+				assertTrue("Size of first stco entry does not match", testStco.sizes[0] == (entrysize - remainder));
 
 			}
-			catch(CloneNotSupportedException ex)
+			catch (CloneNotSupportedException ex)
 			{
 			}
 
