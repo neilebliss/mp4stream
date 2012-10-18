@@ -1,22 +1,21 @@
 /**
-* Licensed to the Apache Software Foundation (ASF) under one
-* or more contributor license agreements.  See the NOTICE file
-* distributed with this work for additional information
-* regarding copyright ownership.  The ASF licenses this file
-* to you under the Apache License, Version 2.0 (the
-* "License"); you may not use this file except in compliance
-* with the License.  You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import com.sun.corba.se.spi.ior.Writeable;
 import mp4.*;
 import org.eclipse.jetty.server.BlockingHttpConnection;
 import org.eclipse.jetty.server.Request;
@@ -25,7 +24,10 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
@@ -69,13 +71,13 @@ final class PseudoStreamingHandler extends AbstractHandler
 			if (field.contains("start="))
 			{
 				String[] startFields = field.split("=");
-				startTime = fields[1];
+				startTime = startFields[1];
 				break;
 			}
 		}
 		Float seekTime = Float.parseFloat(startTime);
 		long offset = Mp4Utils.findOffset(seekTime, mp4.trakStubs);
-		long contentLength = mp4File.length() - offset;
+		//long contentLength = mp4File.length() - offset;
 
 
 		// read in the "raw" mp4metadata and adjust it.
@@ -167,16 +169,22 @@ final class PseudoStreamingHandler extends AbstractHandler
 		//
 
 		FileChannel mp4FileChannel = new FileInputStream(mp4File).getChannel();
-		long currentPosition = offset;
-		long bytesRemaining = mp4File.length() - offset;
-		long nbytes = 0;
-		while (bytesRemaining > 0)
+		try
 		{
-			nbytes = mp4FileChannel.transferTo(currentPosition, bytesRemaining, outChannel);
-			currentPosition += nbytes;
-			bytesRemaining -= nbytes;
+			long currentPosition = offset;
+			long bytesRemaining = mp4File.length() - offset;
+			long nbytes = 0;
+			while (bytesRemaining > 0)
+			{
+				nbytes = mp4FileChannel.transferTo(currentPosition, bytesRemaining, outChannel);
+				currentPosition += nbytes;
+				bytesRemaining -= nbytes;
+			}
 		}
-		outChannel.close();
-		mp4FileChannel.close();
+		finally
+		{
+			outChannel.close();
+			mp4FileChannel.close();
+		}
 	}
 }
