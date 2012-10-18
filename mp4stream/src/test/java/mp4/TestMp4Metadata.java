@@ -6,7 +6,7 @@ import java.io.*;
 
 public final class TestMp4Metadata extends TestCase
 {
-	private final static String TEST_FILE_LOCATION = "./mp4stream/test_data/simpsons.mp4";
+	private final static String TEST_FILE_LOCATION = "./test_data/simpsons.mp4";
 
 	public void setUp()
 	{
