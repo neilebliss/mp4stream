@@ -1,4 +1,4 @@
-java_mp4_slicer
+mp4stream
 ===============
 
 ABSTRACT
@@ -7,7 +7,7 @@ This project provides an example implementation of an MP4 file subdivider, enabl
 
 BUILDING
 
-This project uses Apache Maven as a build tool.  To build the project, cd into the "mp4stream" directory and run "mvn package".
+This project uses Apache Maven as a build tool.  To build the project, run "mvn package".
 The build results (assuming a successful build and test pass) may be found in target/mp4stream-1.0.jar
 
 
