@@ -75,7 +75,17 @@ final class PseudoStreamingHandler extends AbstractHandler
 				break;
 			}
 		}
-		Float seekTime = Float.parseFloat(startTime);
+
+		// try to read the specified seek time.  If it doesn't work out, start at 0.
+		Float seekTime = 0;
+		try
+		{
+			Float.parseFloat(startTime);
+		}
+		catch (NumberFormatException n)
+		{
+		}
+
 		long offset = Mp4Utils.findOffset(seekTime, mp4.trakStubs);
 		//long contentLength = mp4File.length() - offset;
 
