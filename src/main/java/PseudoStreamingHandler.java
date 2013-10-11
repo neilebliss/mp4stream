@@ -160,10 +160,6 @@ final class PseudoStreamingHandler extends AbstractHandler
 		}
 
 		//
-		// now try to save this off to disk for later.
-		//
-
-		//
 		// here, we need to construct the beginning of an mdat box that reflects
 		// the new length of the remaining movie data, taking into account the
 		// requested offset.
@@ -172,6 +168,7 @@ final class PseudoStreamingHandler extends AbstractHandler
 		Mdat mdat = new Mdat();
 		mdat.boxLen = (int) (8 + mp4File.length() - offset);
 		mdat.write(socketTarget);
+
 		//
 		// from here, read the rest of the data from the requested
 		// offset into the cached datafile, as we would for any other
