@@ -80,7 +80,7 @@ final class PseudoStreamingHandler extends AbstractHandler
 		Float seekTime = 0;
 		try
 		{
-			Float.parseFloat(startTime);
+			seekTime = Float.parseFloat(startTime);
 		}
 		catch (NumberFormatException n)
 		{
