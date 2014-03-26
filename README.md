@@ -7,14 +7,14 @@ This project provides an example implementation of an MP4 file subdivider, enabl
 
 BUILDING
 
-This project uses Apache Maven as a build tool.  To build the project, run "mvn package".
-The build results (assuming a successful build and test pass) may be found in target/mp4stream-1.0.jar
+This project uses Apache Maven as a build tool.  To build the project, run "mvn clean compile assembly:single".
+The build results (assuming a successful build and test pass) may be found in target/mp4stream-1.0-jar-with-dependencies.jar
 
 
 
 RUNNING
 
-To use the utility, place mp4 files into the desired working directory, and then run "java -cp mp4stream-1.0.jar Mp4PseudoServer".
+To use the utility, place mp4 files into the desired working directory, and then run "java -jar target/mp4stream-1.0-jar-with-dependencies.jar".
 This will spawn an HTTP server on port 8080.  Access the server via an HTTP client, specifying the mp4 filename and the desired start
 time in the URL.  
 
