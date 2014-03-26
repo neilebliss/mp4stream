@@ -77,7 +77,7 @@ final class PseudoStreamingHandler extends AbstractHandler
 		}
 
 		// try to read the specified seek time.  If it doesn't work out, start at 0.
-		Float seekTime = 0;
+		Float seekTime = 0f;
 		try
 		{
 			seekTime = Float.parseFloat(startTime);
