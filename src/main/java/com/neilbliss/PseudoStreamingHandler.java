@@ -35,7 +35,7 @@ import java.nio.channels.WritableByteChannel;
 final class PseudoStreamingHandler extends AbstractHandler
 {
 
-	@Override public void handle(final String jettyTarget,
+	public void handle(final String jettyTarget,
 				     final Request request,
 				     final HttpServletRequest httpRequest,
 				     final HttpServletResponse response) throws IOException, ServletException
