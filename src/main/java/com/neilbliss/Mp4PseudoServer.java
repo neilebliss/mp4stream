@@ -16,9 +16,7 @@ package com.neilbliss; /**
 * limitations under the License.
 */
 
-import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.bio.SocketConnector;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 
@@ -26,12 +24,7 @@ final class Mp4PseudoServer
 {
 	public static void main(String[] args) throws Exception
 	{
-		Server server = new Server();
-		SocketConnector sc = new SocketConnector();
-		sc.setPort(8080);
-		Connector[] connectors = new Connector[1];
-		connectors[0] = sc;
-		server.setConnectors(connectors);
+		Server server = new Server(8080);
 		ContextHandlerCollection cc = new ContextHandlerCollection();
 		ContextHandler ch = cc.addContext("/", ".");
 		PseudoStreamingHandler pseudoStreamingHandler = new PseudoStreamingHandler();

@@ -17,7 +17,6 @@ package com.neilbliss; /**
  */
 
 import com.neilbliss.mp4.*;
-import org.eclipse.jetty.server.BlockingHttpConnection;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
@@ -42,7 +41,7 @@ final class PseudoStreamingHandler extends AbstractHandler
 	{
 		request.setHandled(true);
 
-		OutputStream socketTarget = BlockingHttpConnection.getCurrentConnection().getOutputStream();
+		OutputStream socketTarget = response.getOutputStream();
 		WritableByteChannel outChannel = Channels.newChannel(socketTarget);
 		String filename = httpRequest.getPathInfo();
 		Mp4Metadata mp4 = null;
@@ -53,7 +52,7 @@ final class PseudoStreamingHandler extends AbstractHandler
 		}
 		catch (Exception e)
 		{
-			response.setHeader("Failure-Reason", "file not found or bad com.neilbliss.mp4 file");
+			response.setHeader("Failure-Reason", "file not found or bad mp4 file");
 			response.setStatus(404);
 			return;
 		}
@@ -87,7 +86,6 @@ final class PseudoStreamingHandler extends AbstractHandler
 		}
 
 		long offset = Mp4Utils.findOffset(seekTime, mp4.trakStubs);
-		//long contentLength = mp4File.length() - offset;
 
 
 		// read in the "raw" mp4metadata and adjust it.
