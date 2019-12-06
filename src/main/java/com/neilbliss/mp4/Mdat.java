@@ -27,7 +27,7 @@ public final class Mdat extends Box
 {
 	private static final long serialVersionUID = 9167926454385309003L;
 	//
-	// the mdat container is used to hold the movie data for an com.neilbliss.mp4.
+	// the mdat container is used to hold the movie data for an mp4.
 	// for our purposes, we don't really want to hold a ton of data in it,
 	// so we'll just leave it as a Box wrapper.
 	//

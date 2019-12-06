@@ -28,10 +28,8 @@ public final class Mp4Metadata implements Serializable
 	public Mp4        mp4;
 	public TrakStub[] trakStubs;
 
-	public Mp4Metadata(final File infile)
+	public Mp4Metadata(final File infile) throws Exception
 	{
-		try
-		{
 			final InputStream in;
 			if (null != infile)
 			{
@@ -199,11 +197,6 @@ public final class Mp4Metadata implements Serializable
 					mp4.datarate = -1;
 				}
 			}
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
 	}
 
 	private Mp4 processFiledata(final InputStream in, final long fileSize, long offset) throws IOException
@@ -462,7 +455,7 @@ public final class Mp4Metadata implements Serializable
 /*
 	public static void main(final String[] args)
 	{
-		// standalone interface to allow a test of the compatability of a given com.neilbliss.mp4 file with our processing.
+		// standalone interface to allow a test of the compatability of a given mp4 file with our processing.
 		final Mp4Metadata m = new Mp4Metadata(new File(args[0]));
 	}
 */

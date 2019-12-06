@@ -27,7 +27,7 @@ public final class Mp4Utils
 	{
 	}
 
-	public static synchronized Mp4Metadata extractMp4Metadata(String inputFilename) throws IOException
+	public static synchronized Mp4Metadata extractMp4Metadata(String inputFilename) throws Exception
 	{
 		final Mp4Metadata mp4meta;
 		mp4meta = new Mp4Metadata(new File(inputFilename));
