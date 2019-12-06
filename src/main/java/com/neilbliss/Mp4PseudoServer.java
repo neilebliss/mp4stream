@@ -17,20 +17,13 @@ package com.neilbliss; /**
 */
 
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 
 final class Mp4PseudoServer
 {
 	public static void main(String[] args) throws Exception
 	{
 		Server server = new Server(8080);
-		ContextHandlerCollection cc = new ContextHandlerCollection();
-		ContextHandler ch = cc.addContext("/", ".");
-		PseudoStreamingHandler pseudoStreamingHandler = new PseudoStreamingHandler();
-		ch.setHandler(pseudoStreamingHandler);
-		ch.setAllowNullPathInfo(true);
-		server.setHandler(cc);
+		server.setHandler(new PseudoStreamingHandler());
 		server.start();
 	}
 }

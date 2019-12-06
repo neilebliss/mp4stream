@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.channels.Channels;
@@ -52,26 +53,27 @@ final class PseudoStreamingHandler extends AbstractHandler
 		}
 		catch (Exception e)
 		{
-			response.setHeader("Failure-Reason", "file not found or bad mp4 file");
-			response.setStatus(404);
+			response.setStatus(507);
 			return;
 		}
-
 		//
 		// we expect that there's a start=XXX query parameter, specifying the start time in
 		// seconds.  If we don't find it, we'll just play the show from the beginning.
 		//
 
-		String query = httpRequest.getQueryString();
-		String[] fields = query.split("&");
 		String startTime = "0";
-		for (String field : fields)
+		String query = httpRequest.getQueryString();
+		if (query != null)
 		{
-			if (field.contains("start="))
+			String[] fields = query.split("&");
+			for (String field : fields)
 			{
-				String[] startFields = field.split("=");
-				startTime = startFields[1];
-				break;
+				if (field.contains("start="))
+				{
+					String[] startFields = field.split("=");
+					startTime = startFields[1];
+					break;
+				}
 			}
 		}
 
@@ -86,7 +88,7 @@ final class PseudoStreamingHandler extends AbstractHandler
 		}
 
 		long offset = Mp4Utils.findOffset(seekTime, mp4.trakStubs);
-
+		System.out.println("offset: " + offset);
 
 		// read in the "raw" mp4metadata and adjust it.
 		long stcoRebase = 0;
@@ -140,15 +142,18 @@ final class PseudoStreamingHandler extends AbstractHandler
 		{
 			if (box instanceof Ftyp)
 			{
+				System.out.println("writing ftyp");
 				((Ftyp) box).write(socketTarget);
 			}
 			else if (box instanceof Moov)
 			{
+				System.out.println("writing moov");
 				// use our adjusted moov.
 				mp4.mp4.moov.write(socketTarget);
 			}
 			else if (box instanceof Mdat || "free".equals(box.boxType))
 			{
+				System.out.println("skipping mdat or free box");
 				// do not write this one.
 			}
 			else
